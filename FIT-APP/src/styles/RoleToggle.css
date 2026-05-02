@@ -1,0 +1,206 @@
+/* Role Toggle Container */
+.role-toggle-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 15px 0;
+  width: 100%;
+}
+
+/* Dropdown-specific styles */
+.role-toggle-dropdown {
+  display: flex;
+  align-items: center;
+}
+
+.role-select-label {
+  display: none;
+}
+
+.role-select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.role-select:focus {
+  outline: none;
+  border-color: rgba(255,255,255,0.35);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+
+.role-select option {
+  color: #111;
+}
+
+/* Role Label */
+.role-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: left;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Role Toggle Group */
+.role-toggle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* Individual Role Button */
+.role-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 500;
+  position: relative;
+  overflow: hidden;
+}
+
+.role-button:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateX(5px);
+}
+
+.role-button.active {
+  background: rgba(255, 255, 255, 0.15);
+  font-weight: 600;
+}
+
+/* Emoji / Icon */
+.role-emoji {
+  font-size: 20px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Role Info Section */
+.role-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+.role-name {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.role-desc {
+  font-size: 11px;
+  opacity: 0.7;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .role-toggle-container {
+    margin: 12px 0;
+    gap: 10px;
+  }
+
+  .role-button {
+    padding: 10px 12px;
+    font-size: 13px;
+  }
+
+  .role-emoji {
+    font-size: 18px;
+  }
+
+  .role-name {
+    font-size: 12px;
+  }
+
+  .role-desc {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .role-toggle-group {
+    gap: 8px;
+  }
+
+  .role-button {
+    padding: 10px 10px;
+    gap: 10px;
+  }
+
+  .role-emoji {
+    font-size: 16px;
+    min-width: 20px;
+  }
+
+  .role-name {
+    font-size: 11px;
+  }
+
+  .role-desc {
+    font-size: 9px;
+  }
+}
+
+/* Animation for active state */
+@keyframes roleActive {
+  0% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.9;
+  }
+}
+
+.role-button.active::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(135deg, #ff3cac, #784ba0);
+  animation: roleActive 1s ease-in-out infinite;
+}
+
+/* Responsive tweaks for dropdown */
+@media (max-width: 768px) {
+  .role-select {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
+
+@media (max-width: 480px) {
+  .role-select {
+    font-size: 12px;
+    padding: 9px;
+  }
+}

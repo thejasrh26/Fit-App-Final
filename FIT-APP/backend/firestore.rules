@@ -1,0 +1,367 @@
+/**
+ * FIRESTORE SECURITY RULES - Role-Based Access Control
+ * 
+ * Copy this entire content into Firebase Console:
+ * Firestore Database > Rules tab > Replace all content
+ * 
+ * These rules enforce role-based access control at the database level.
+ * Rules are evaluated in order - first matching rule applies.
+ */
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // ============================================
+    // HELPER FUNCTIONS
+    // ============================================
+    
+    /**
+     * Check if request is authenticated
+     */
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    /**
+     * Check if user owns the document
+     */
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    /**
+     * Get user role from Firestore
+     */
+    function getUserRole(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.role;
+    }
+    
+    /**
+     * Check if user is admin
+     */
+    function isAdmin() {
+      return getUserRole(request.auth.uid) == 'admin';
+    }
+    
+    /**
+     * Check if user is trainer
+     */
+    function isTrainer() {
+      return getUserRole(request.auth.uid) == 'trainer';
+    }
+    
+    /**
+     * Check if user is member
+     */
+    function isMember() {
+      return getUserRole(request.auth.uid) == 'member';
+    }
+    
+    /**
+     * Check if user is admin or trainer
+     */
+    function isAdminOrTrainer() {
+      return isAdmin() || isTrainer();
+    }
+    
+    /**
+     * Check if user is admin or member
+     */
+    function isAdminOrMember() {
+      return isAdmin() || isMember();
+    }
+    
+    /**
+     * Check if user is assigned as trainer to this member
+     */
+    function isAssignedTrainer(memberId) {
+      let member = get(/databases/$(database)/documents/members/$(memberId)).data;
+      return member.trainer_ids.contains(request.auth.uid);
+    }
+    
+    // ============================================
+    // USERS COLLECTION
+    // ============================================
+    
+    /**
+     * Users collection - Store user roles and metadata
+     */
+    match /users/{userId} {
+      // Users can only read their own document
+      allow read: if isAuthenticated() && isOwner(userId);
+      
+      // Admin can read all user documents
+      allow read: if isAuthenticated() && isAdmin();
+      
+      // Users can only write to their own role field (role is set by backend only)
+      allow write: if false;
+      
+      // Admin can update any user
+      allow update: if isAuthenticated() && isAdmin();
+      
+      // Admin can delete any user
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+    
+    // ============================================
+    // MEMBERS COLLECTION
+    // ============================================
+    
+    /**
+     * Members collection - Member profiles and assignments
+     */
+    match /members/{memberId} {
+      // Members can read their own profile
+      allow read: if isAuthenticated() && isOwner(memberId);
+      
+      // Trainers can read member profiles assigned to them
+      allow read: if isAuthenticated() && (
+        isAdmin() || 
+        isAssignedTrainer(memberId)
+      );
+      
+      // Members can update their own profile (limited fields)
+      allow update: if isAuthenticated() && isOwner(memberId) && (
+        !request.resource.data.diff(resource.data).affectedKeys()
+          .hasAny(['role', 'trainer_ids', 'verification_status'])
+      );
+      
+      // Admin can update any member profile
+      allow update: if isAuthenticated() && isAdmin();
+      
+      // Admin can create new member profiles
+      allow create: if isAuthenticated() && isAdmin();
+      
+      // Admin can delete member profiles
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+    
+    // ============================================
+    // WORKOUTS COLLECTION
+    // ============================================
+    
+    /**
+     * Workouts collection - Workout plans and templates
+     */
+    match /workouts/{workoutId} {
+      // Public view of workouts
+      allow read: if isAuthenticated();
+      
+      // Trainers can create workouts
+      allow create: if isAuthenticated() && (isAdmin() || isTrainer()) && (
+        request.resource.data.createdBy == request.auth.uid
+      );
+      
+      // Trainers can update their own workouts
+      allow update: if isAuthenticated() && (
+        isAdmin() || 
+        (resource.data.createdBy == request.auth.uid && isTrainer())
+      );
+      
+      // Only trainer who created can delete their workout
+      allow delete: if isAuthenticated() && (
+        isAdmin() ||
+        (resource.data.createdBy == request.auth.uid && isTrainer())
+      );
+      
+      // Subcollection: exercises
+      match /exercises/{exerciseId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && (isAdmin() || isTrainer());
+        allow update: if isAuthenticated() && (isAdmin() || isTrainer());
+        allow delete: if isAuthenticated() && (isAdmin() || isTrainer());
+      }
+    }
+    
+    // ============================================
+    // USER WORKOUTS COLLECTION
+    // ============================================
+    
+    /**
+     * User Workouts collection - Track completed workouts
+     */
+    match /user_workouts/{userWorkoutId} {
+      // Users can read their own workout history
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+      
+      // Trainers can read their members' workout history
+      allow read: if isAuthenticated() && isAdminOrTrainer();
+      
+      // Users can create their own workout records
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      
+      // Users can update their own workout records
+      allow update: if isAuthenticated() && isOwner(resource.data.userId);
+      
+      // Admin can delete any workout record
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+    
+    // ============================================
+    // DIET PLANS COLLECTION
+    // ============================================
+    
+    /**
+     * Diet Plans collection - Nutrition plans
+     */
+    match /diet_plans/{planId} {
+      // Authenticated users can view diet plans
+      allow read: if isAuthenticated();
+      
+      // Trainers can create diet plans
+      allow create: if isAuthenticated() && (isAdmin() || isTrainer());
+      
+      // Trainers can update their own plans
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (resource.data.createdBy == request.auth.uid && isTrainer())
+      );
+      
+      // Trainers can delete their own plans
+      allow delete: if isAuthenticated() && (
+        isAdmin() ||
+        (resource.data.createdBy == request.auth.uid && isTrainer())
+      );
+    }
+    
+    // ============================================
+    // SESSIONS COLLECTION
+    // ============================================
+    
+    /**
+     * Sessions collection - Training sessions booking
+     */
+    match /sessions/{sessionId} {
+      // Users can read their own sessions
+      allow read: if isAuthenticated() && (
+        isOwner(resource.data.memberId) ||
+        isOwner(resource.data.trainerId) ||
+        isAdmin()
+      );
+      
+      // Members can create session requests
+      allow create: if isAuthenticated() && isMember() && (
+        request.resource.data.memberId == request.auth.uid
+      );
+      
+      // Trainers and members can update sessions
+      allow update: if isAuthenticated() && (
+        isOwner(resource.data.trainerId) ||
+        isOwner(resource.data.memberId) ||
+        isAdmin()
+      );
+      
+      // Only admin can delete sessions
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+    
+    // ============================================
+    // AUDIT LOGS COLLECTION
+    // ============================================
+    
+    /**
+     * Audit Logs collection - Security and compliance
+     */
+    match /audit_logs/{logId} {
+      // Only admin can view audit logs
+      allow read: if isAuthenticated() && isAdmin();
+      
+      // No one can write to audit logs directly (backend only)
+      allow create, update, delete: if false;
+    }
+    
+    // ============================================
+    // PAYMENTS COLLECTION
+    // ============================================
+    
+    /**
+     * Payments collection - Payment records
+     */
+    match /payments/{paymentId} {
+      // Users can only view their own payments
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+      
+      // Admin can view all payments
+      allow read: if isAuthenticated() && isAdmin();
+      
+      // Users can create payment records
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      
+      // Only admin can update payments
+      allow update: if isAuthenticated() && isAdmin();
+      
+      // Only admin can delete payments
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+    
+    // ============================================
+    // SUBSCRIPTIONS COLLECTION
+    // ============================================
+    
+    /**
+     * Subscriptions collection - Gym memberships
+     */
+    match /subscriptions/{subscriptionId} {
+      // Users can read their own subscriptions
+      allow read: if isAuthenticated() && isOwner(resource.data.userId);
+      
+      // Admin can read all subscriptions
+      allow read: if isAuthenticated() && isAdmin();
+      
+      // Only admin can create subscriptions
+      allow create: if isAuthenticated() && isAdmin();
+      
+      // Only admin can update subscriptions
+      allow update: if isAuthenticated() && isAdmin();
+      
+      // Only admin can delete subscriptions
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+    
+    // ============================================
+    // BRANCHES COLLECTION
+    // ============================================
+    
+    /**
+     * Branches collection - Gym branch information
+     */
+    match /branches/{branchId} {
+      // All authenticated users can view branches
+      allow read: if isAuthenticated();
+      
+      // Only admin can create branches
+      allow create: if isAuthenticated() && isAdmin();
+      
+      // Only admin can update branches
+      allow update: if isAuthenticated() && isAdmin();
+      
+      // Only admin can delete branches
+      allow delete: if isAuthenticated() && isAdmin();
+    }
+    
+    // ============================================
+    // ANALYTICS COLLECTION
+    // ============================================
+    
+    /**
+     * Analytics collection - App metrics and statistics
+     */
+    match /analytics/{analyticsId} {
+      // Only admin can view analytics
+      allow read: if isAuthenticated() && isAdmin();
+      
+      // No one can write to analytics directly (backend only)
+      allow write: if false;
+    }
+    
+    // ============================================
+    // DEFAULT DENY
+    // ============================================
+    
+    // Deny all access to any collection not explicitly defined
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

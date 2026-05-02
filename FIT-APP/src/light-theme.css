@@ -1,0 +1,162 @@
+/* Light Mode Overrides */
+body.light-mode {
+  background-color: #f1f5f9 !important;
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(210, 100%, 95%, 1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(240, 100%, 95%, 0.5) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(280, 100%, 95%, 0.5) 0, transparent 50%) !important;
+  color: #0f172a !important;
+}
+
+/* Base structural elements */
+body.light-mode .main-layout,
+body.light-mode .auth-wrapper,
+body.light-mode .layout,
+body.light-mode .main-content {
+  background: transparent !important;
+}
+
+/* Glass components */
+body.light-mode .card,
+body.light-mode .glass,
+body.light-mode .plan-card,
+body.light-mode .checkout-card,
+body.light-mode .ai-chat-window,
+body.light-mode .sidebar,
+body.light-mode .section-card,
+body.light-mode .stat-card,
+body.light-mode .workout-card,
+body.light-mode .dashboard-card {
+  background: rgba(255, 255, 255, 0.7) !important;
+  backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.05) !important;
+  color: #0f172a !important;
+}
+
+/* Text Colors */
+body.light-mode h1,
+body.light-mode h2,
+body.light-mode h3,
+body.light-mode h4,
+body.light-mode p,
+body.light-mode span:not(.ai-bot-icon):not(.menu-icon):not(.user-role):not(.popular-badge),
+body.light-mode label,
+body.light-mode .menu-label,
+body.light-mode .price,
+body.light-mode .feature-list li,
+body.light-mode .dashboard-header p,
+body.light-mode a {
+  color: #1e293b !important;
+}
+
+/* Lighter text for subtitles */
+body.light-mode .period,
+body.light-mode .user-email,
+body.light-mode .workout-info p,
+body.light-mode .stat-content h3 {
+  color: #64748b !important;
+}
+
+/* Headers and Footers */
+body.light-mode .sidebar-header,
+body.light-mode .sidebar-footer,
+body.light-mode .ai-chat-header,
+body.light-mode .checkout-summary,
+body.light-mode .ai-chat-input-area,
+body.light-mode .topbar {
+  background: rgba(0, 0, 0, 0.02) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Inputs and Textareas */
+body.light-mode input:not([type="checkbox"]):not([type="radio"]),
+body.light-mode textarea {
+  background: #ffffff !important;
+  border: 1px solid rgba(0, 0, 0, 0.15) !important;
+  color: #0f172a !important;
+}
+
+body.light-mode input:not([type="checkbox"]):focus,
+body.light-mode textarea:focus {
+  background: #ffffff !important;
+  border-color: #6366f1 !important;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2) !important;
+}
+
+body.light-mode input::placeholder,
+body.light-mode textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+/* Autofill fix for light mode */
+body.light-mode input:-webkit-autofill,
+body.light-mode input:-webkit-autofill:hover, 
+body.light-mode input:-webkit-autofill:focus, 
+body.light-mode input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #0f172a !important;
+}
+
+/* Sidebar Menu */
+body.light-mode .menu-item:hover,
+body.light-mode .sidebar li:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+  color: #0f172a !important;
+}
+
+body.light-mode .menu-item.active {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%) !important;
+  color: #4f46e5 !important;
+  border-left-color: #4f46e5 !important;
+}
+
+/* Buttons */
+body.light-mode .back-btn {
+  color: #475569 !important;
+}
+body.light-mode .back-btn:hover {
+  color: #0f172a !important;
+}
+
+body.light-mode .logout-btn {
+  background: rgba(239, 68, 68, 0.1) !important;
+  border-color: rgba(239, 68, 68, 0.2) !important;
+  color: #ef4444 !important;
+}
+body.light-mode .logout-btn:hover {
+  background: #ef4444 !important;
+  color: white !important;
+}
+
+/* AI Chatbox Specifics */
+body.light-mode .ai-message-content {
+  color: #0f172a !important;
+}
+body.light-mode .ai-message.assistant .ai-message-content {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
+body.light-mode .ai-message.user .ai-message-content {
+  color: #ffffff !important;
+}
+
+/* App Logo */
+body.light-mode .app-logo {
+  text-shadow: none !important;
+  color: #0f172a !important;
+}
+
+/* Special overrides */
+body.light-mode .divider {
+  color: #64748b !important;
+}
+body.light-mode .divider::before, 
+body.light-mode .divider::after {
+  background: rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Role Badges */
+body.light-mode .role-badge {
+  color: #ffffff !important; /* Keep text white inside colored badges */
+  border: none !important;
+}
